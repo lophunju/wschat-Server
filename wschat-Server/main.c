@@ -12,7 +12,9 @@ int main(int argc, char* argv[]) {
 	SOCKADDR_IN servAddr, clntAddr;
 
 	int szClntAddr;
-	char message[] = "Hello~!";
+	char welcome[] = "상대방과 연결되었습니다.\n";
+	char msg[30];
+	int strlen;
 
 	if (argc != 2) {
 		printf("Usage : %s <port>\n", argv[0]); //실행시 port번호 필요
@@ -46,8 +48,21 @@ int main(int argc, char* argv[]) {
 
 	closesocket(hServSock);
 
-	send(hClntSock, message, sizeof(message), 0);
+	printf("상대방과 연결되었습니다.\n\n");
 
+	send(hClntSock, welcome, sizeof(welcome), 0);
+
+	while (1) {
+		strlen = recv(hClntSock, msg, sizeof(msg), 0);
+		if (strlen == -1)
+			printf("상대방으로부터 메세지가 정상적으로 수신되지 않았습니다.\n");
+		else if (strcmp(msg,"quit") == 0)
+			break;
+		else
+			printf("상대방: %s \n", msg);
+	}
+
+	printf("연결을 종료합니다.\n");
 	closesocket(hClntSock);
 	WSACleanup();
 
