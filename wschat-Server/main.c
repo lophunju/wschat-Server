@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 void ErrorHandling(char* message);
+void removeEnter(char* str);
 
 int main(int argc, char* argv[]) {
 
@@ -13,7 +14,7 @@ int main(int argc, char* argv[]) {
 
 	int szClntAddr;
 	char welcome[] = "상대방과 연결되었습니다.\n";
-	char msg[30];
+	char msg[50];
 	int strlen;
 
 	if (argc != 2) {
@@ -21,6 +22,7 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
+	//연결부
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		ErrorHandling("WSAStartup() error!");
 
@@ -52,7 +54,9 @@ int main(int argc, char* argv[]) {
 
 	send(hClntSock, welcome, sizeof(welcome), 0);
 
+	//대화시작
 	while (1) {
+		//받기
 		strlen = recv(hClntSock, msg, sizeof(msg), 0);
 		if (strlen == -1)
 			printf("상대방으로부터 메세지가 정상적으로 수신되지 않았습니다.\n");
@@ -60,13 +64,28 @@ int main(int argc, char* argv[]) {
 			break;
 		else
 			printf("상대방: %s \n", msg);
+
+		//보내기
+		printf("나: ");
+		rewind(stdin);
+		fgets(msg, sizeof(msg), stdin);
+		removeEnter(msg);
+		send(hClntSock, msg, sizeof(msg), 0);
+
+		if (strcmp(msg, "quit") == 0)
+			break;
 	}
 
+	//연결 해제부
 	printf("연결을 종료합니다.\n");
 	closesocket(hClntSock);
 	WSACleanup();
 
 	return 0;
+}
+
+void removeEnter(char* str) {
+	str[strlen(str) - 1] = '\0';
 }
 
 void ErrorHandling(char* message) {
